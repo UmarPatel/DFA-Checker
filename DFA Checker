@@ -1,0 +1,95 @@
+import itertools
+
+class DFA:
+    # initialize the current state
+    current_state = None
+    def __init__(self, states, alphabet, transition_function, start_state, accept_states):
+        self.states = states
+        self.alphabet = alphabet
+        self.transition_function = transition_function
+        self.start_state = start_state
+        self.accept_states = accept_states
+        self.current_state = start_state
+        
+
+    def transition_to_state_with_input(self, input_value):
+        # error check to make sure the current state exists
+        if ((self.current_state, input_value) not in self.transition_function.keys()):
+            self.current_state = None
+            return
+        # transition to input state
+        self.current_state = self.transition_function[(self.current_state, input_value)]
+
+    def in_accept_state(self):
+        return self.current_state in accept_states
+
+    def go_to_initial_state(self):
+        self.current_state = self.start_state
+        
+
+    def run_with_input_list(self, input_list):
+        self.go_to_initial_state();
+        for inp in input_list:
+            self.transition_to_state_with_input(inp)
+            continue
+        return self.in_accept_state()
+
+
+# all states within DFA
+states = {0, 1, 2, 3, 4, 5}
+alphabet = {'0', '1'}
+
+# transition function from state to state
+tf = dict();
+tf[(0, '0')] = 1
+tf[(0, '1')] = 0
+tf[(1, '0')] = 2
+tf[(1, '1')] = 3
+tf[(2, '0')] = 7
+tf[(2, '1')] = 5
+tf[(3, '0')] = 9
+tf[(3, '1')] = 4
+tf[(4, '0')] = 2
+tf[(4, '1')] = 4
+tf[(5, '0')] = 9
+tf[(5, '1')] = 6
+tf[(6, '0')] = 7
+tf[(6, '1')] = 6
+tf[(7, '0')] = 1
+tf[(7, '1')] = 8
+tf[(8, '0')] = 9
+tf[(8, '1')] = 0
+tf[(9, '0')] = 9
+tf[(9, '1')] = 9
+start_state = 0
+accept_states = {0, 7, 8}
+
+d = DFA(states, alphabet, tf, start_state, accept_states)
+
+# generate all permutations of the language of length of repeat (n)
+lst = list(itertools.product(['0', '1'], repeat = 2))
+lista = []
+for x in lst:
+    lista.append(''.join(x))
+
+# list that contains all correct and incorrect strings as per the
+# requirement of the DFA
+ideal = []
+for x in lista:
+    if x.count('0') % 3 == 0 and '010' not in x:
+        ideal.append(True)
+    else:
+        ideal.append(False)
+
+# list that contains all correct and incorrect strings as per the input DFA
+result = []
+for x in lista:
+    result.append(d.run_with_input_list(x))
+
+# list that contains all incorrect strings 
+incorrect = []
+for x in range(len(lista)):
+    if ideal[x] != result[x]:
+        incorrect.append(lista[x])
+
+print(incorrect)
